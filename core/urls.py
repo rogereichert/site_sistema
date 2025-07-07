@@ -18,10 +18,29 @@ from django.contrib import admin
 from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import path
+from apps.base import views as base_view
 
-urlpatters = [
-    path('admin/', admin.site.urls)
+import logging
+from django.http import JsonResponse
+
+# Obtenha o logger configurado
+logger = logging.getLogger('requestlogs')
+
+def test_logging_view(request):
+    try:
+        data = {'user': 'Roger', 'email': 'rogereichert@gmail.com'}
+        # Força um erro proposital para testar o log
+        raise ValueError("Erro simulado no envio de email")
+    except Exception as e:
+        # Loga o erro usando o logger configurado
+        logger.error(f"{str(e)} | {str(data)}")
+        return JsonResponse({"status": "error", "message": "Ocorreu um erro."})
+    
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('test-logging/', test_logging_view, name='test_logging'),
+    path('base/', base_view.base_view, name='base')
+
 ]
 
-urlpatters += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
-urlpatters += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
